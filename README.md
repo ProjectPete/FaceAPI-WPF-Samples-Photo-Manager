@@ -1,5 +1,7 @@
 # FaceAPI-WPF-Samples-Photo-Manager
-Extending the Azure FaceAPI demo solution, to include a photo manager, using Congitive Services Face Recognition API to identify and catalogue the pictures
+Extending the Azure FaceAPI demo solution, to include a photo manager.
+
+Using Congitive Services Face Recognition API, to identify and catalogue the people in my large photo collections.
 
 This project is an extention to the excellent introduction to Mcrosoft Azure's Congitive Services Face Recognition API.
 
