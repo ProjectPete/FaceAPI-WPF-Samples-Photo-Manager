@@ -1,4 +1,4 @@
-﻿using ClientLibrary.Data;
+﻿using Microsoft.ProjectOxford.Face.Contract;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClientLibrary.Data
+namespace Photo_Detect_Catalogue_Search_WPF_App.Data
 {
     public class SqlDataProvider : IDataProvider
     {

@@ -186,35 +186,14 @@
       <DependentUpon>SortMyPhotosPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\UIHelper.cs" />
-    <Compile Include="Data\Person.cs">
-      <DependentUpon>PicturesDatabaseModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Data\PictureFile.cs">
-      <DependentUpon>PicturesDatabaseModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Data\PictureFileGroupLookup.cs">
-      <DependentUpon>PicturesDatabaseModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Data\PicturePerson.cs">
-      <DependentUpon>PicturesDatabaseModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Data\SqlDataProvider.cs" />
     <Compile Include="Data\IDataProvider.cs" />
-    <Compile Include="Data\PicturesDatabaseModel.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PicturesDatabaseModel.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Data\PicturesDatabaseModel.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PicturesDatabaseModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Data\PicturesDatabaseModel.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PicturesDatabaseModel.edmx</DependentUpon>
-    </Compile>
+    <Compile Include="Data\Person.cs" />
+    <Compile Include="Data\PhotosDatabase.cs" />
+    <Compile Include="Data\PictureFile.cs" />
+    <Compile Include="Data\PictureFileGroupLookup.cs" />
+    <Compile Include="Data\PicturePerson.cs" />
+    <Compile Include="Data\SqlDataProvider.cs" />
+    <Compile Include="Helpers\SdkTransientExceptionDetectionStrategy .cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -229,13 +208,6 @@
   <ItemGroup>
     <None Include="App.config">
       <SubType>Designer</SubType>
-    </None>
-    <EntityDeploy Include="Data\PicturesDatabaseModel.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>PicturesDatabaseModel.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <None Include="Data\PicturesDatabaseModel.edmx.diagram">
-      <DependentUpon>PicturesDatabaseModel.edmx</DependentUpon>
     </None>
     <None Include="packages.config" />
   </ItemGroup>
@@ -264,20 +236,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\PicturesDatabaseModel.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PicturesDatabaseModel.Context.cs</LastGenOutput>
-      <DependentUpon>PicturesDatabaseModel.edmx</DependentUpon>
-    </Content>
-    <Content Include="Data\PicturesDatabaseModel.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>PicturesDatabaseModel.edmx</DependentUpon>
-      <LastGenOutput>PicturesDatabaseModel.cs</LastGenOutput>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">

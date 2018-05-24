@@ -1,29 +1,26 @@
-﻿using ClientLibrary.Data;
-using Microsoft.ProjectOxford.Face;
-using Microsoft.ProjectOxford.Face.Contract;
-using Microsoft.ProjectOxford.Face.Controls;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-//using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿
 
-namespace ClientLibrary.Controls
+namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 {
+    using Microsoft.ProjectOxford.Face;
+    using Microsoft.ProjectOxford.Face.Contract;
+    using Photo_Detect_Catalogue_Search_WPF_App.Data;
+    using Photo_Detect_Catalogue_Search_WPF_App.Models;
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Input;
+    using System.Windows.Media;
+    using System.Windows.Shapes;
+
     /// <summary>
     /// Interaction logic for ScanFolderPage.xaml
     /// </summary>
@@ -34,15 +31,15 @@ namespace ClientLibrary.Controls
         private Queue<string> _files;
         private bool _canScan;
         private LargePersonGroupExtended _scanGroup;
-        private ObservableCollection<Microsoft.ProjectOxford.Face.Controls.Face> _detectedFaces = new ObservableCollection<Microsoft.ProjectOxford.Face.Controls.Face>();
-        private ObservableCollection<Microsoft.ProjectOxford.Face.Controls.Face> _resultCollection = new ObservableCollection<Microsoft.ProjectOxford.Face.Controls.Face>();
+        private ObservableCollection<Models.Face> _detectedFaces = new ObservableCollection<Models.Face>();
+        private ObservableCollection<Models.Face> _resultCollection = new ObservableCollection<Models.Face>();
         private ImageSource _selectedFile;
         private string _selectedFilePath;
         private bool _isDragging;
         private Rectangle _selectRectangle;
         private Point _selectRectangleStartPoint;
-        private SqlDataProvider db = new SqlDataProvider();
-        private FaceServiceClient kfaceServiceClient;
+        private Data.SqlDataProvider db = new Data.SqlDataProvider();
+        private FaceServiceClient faceServiceClient;
         private MainWindow _mainWindow;
 
         public Rectangle SelectRectangle
@@ -150,7 +147,7 @@ namespace ClientLibrary.Controls
             }
         }
 
-        public ObservableCollection<Microsoft.ProjectOxford.Face.Controls.Face> DetectedFaces
+        public ObservableCollection<Models.Face> DetectedFaces
         {
             get
             {
@@ -191,7 +188,7 @@ namespace ClientLibrary.Controls
             }
         }
 
-        public ObservableCollection<Microsoft.ProjectOxford.Face.Controls.Face> ResultCollection
+        public ObservableCollection<Models.Face> ResultCollection
         {
             get
             {
@@ -288,7 +285,7 @@ namespace ClientLibrary.Controls
 
                     foreach (var face in faces)
                     {
-                        DetectedFaces.Add(new Microsoft.ProjectOxford.Face.Controls.Face()
+                        DetectedFaces.Add(new Models.Face()
                         {
                             ImageFile = renderingImage,
                             Left = face.FaceRectangle.Left,
@@ -561,7 +558,7 @@ namespace ClientLibrary.Controls
         private void imgCurrent_MouseUp(object sender, MouseButtonEventArgs e)
         {
             var scale = ((1 / imgCurrent.Source.Width) * imgCurrent.ActualWidth);
-            var face = new Microsoft.ProjectOxford.Face.Controls.Face { Height = (int)(SelectRectangle.Height / scale), Width = (int)(SelectRectangle.Width / scale), Left = (int)(_selectRectangleStartPoint.X / scale), Top = (int)(_selectRectangleStartPoint.Y / scale), ImageFile = SelectedFile };
+            var face = new Models.Face { Height = (int)(SelectRectangle.Height / scale), Width = (int)(SelectRectangle.Width / scale), Left = (int)(_selectRectangleStartPoint.X / scale), Top = (int)(_selectRectangleStartPoint.Y / scale), ImageFile = SelectedFile };
             DetectedFaces.Add(face);
             _isDragging = false;
             canvDrag.Children.Clear();
@@ -675,7 +672,7 @@ namespace ClientLibrary.Controls
         {
             var ctrl = sender as Button;
 
-            var f = ctrl.DataContext as Microsoft.ProjectOxford.Face.Controls.Face;
+            var f = ctrl.DataContext as Models.Face;
             DetectedFaces.Remove(f);
         }
 

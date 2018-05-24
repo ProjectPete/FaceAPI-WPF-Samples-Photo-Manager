@@ -31,17 +31,25 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System.ComponentModel;
-using System.Net;
-using System.Runtime.CompilerServices;
-using System.Windows;
+//
+// SCENARIO: Photo Manager. Identify and tag photos automatically.
+//
+// This scenario combines several Face API features into a fully working example
+// of a photo store management tool. With this tool, you can catalog all your
+// photos and holiday snaps. Once the AI service is sufficiently trained, the
+// hope is that it can identify and tag up to 80% of images. The tool also 
+// enables you to show all photos containing a certain person.
+//
 
-using Microsoft.ProjectOxford.Face.Controls;
-
-using SampleUserControlLibrary;
-
-namespace Microsoft.ProjectOxford.Face
+namespace Photo_Detect_Catalogue_Search_WPF_App
 {
+    using System.ComponentModel;
+    using System.Net;
+    using System.Runtime.CompilerServices;
+    using System.Windows;
+    using Photo_Detect_Catalogue_Search_WPF_App.Controls;
+    using SampleUserControlLibrary;
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -80,29 +88,10 @@ namespace Microsoft.ProjectOxford.Face
             {
                 new Scenario()
                 {
-                    PageClass = typeof(FaceDetectionPage),
-                    Title = "Face Detection",
-                },
-                new Scenario()
-                {
-                    PageClass = typeof(FaceFindSimilarPage),
-                    Title = "Face Find Similar",
-                },
-                new Scenario()
-                {
-                    PageClass = typeof(FaceGroupingPage),
-                    Title = "Face Grouping",
-                },
-                new Scenario()
-                {
                     PageClass = typeof(FaceIdentificationPage),
                     Title = "Face Identification",
                 },
                 new Scenario()
-                {
-                    PageClass = typeof(FaceVerificationPage),
-                    Title = "Face Verification",
-                },                new Scenario()
                 {
                     PageClass = typeof(SortMyPhotosPage),
                     Title = "Sort My Photos",

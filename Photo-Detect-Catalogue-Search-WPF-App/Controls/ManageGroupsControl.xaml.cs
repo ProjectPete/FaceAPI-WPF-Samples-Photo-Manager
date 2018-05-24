@@ -1,29 +1,54 @@
-﻿using ClientLibrary.Data;
-using Microsoft.ProjectOxford.Face;
-using Microsoft.ProjectOxford.Face.Contract;
-using Microsoft.ProjectOxford.Face.Controls;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
+﻿//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license.
+//
+// Microsoft Cognitive Services (formerly Project Oxford): https://www.microsoft.com/cognitive-services
+//
+// Microsoft Cognitive Services (formerly Project Oxford) GitHub:
+// https://github.com/Microsoft/Cognitive-Face-Windows
+//
+// Copyright (c) Microsoft Corporation
+// All rights reserved.
+//
+// MIT License:
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 
-namespace ClientLibrary.Controls
+namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 {
+    using Microsoft.ProjectOxford.Face;
+    using Microsoft.ProjectOxford.Face.Contract;
+    using Photo_Detect_Catalogue_Search_WPF_App.Models;
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Globalization;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Data;
+    using System.Windows.Input;
+
     /// <summary>
     /// Interaction logic for ManageGroupsControl.xaml
     /// </summary>
@@ -47,7 +72,7 @@ namespace ClientLibrary.Controls
         /// <summary>
         /// The database provider layer
         /// </summary>
-        private SqlDataProvider db = new SqlDataProvider();
+        private Data.SqlDataProvider db = new Data.SqlDataProvider();
 
         /// <summary>
         /// max concurrent process number for client query.
@@ -56,8 +81,8 @@ namespace ClientLibrary.Controls
 
         private ObservableCollection<LargePersonGroupExtended> _faceGroups = new ObservableCollection<LargePersonGroupExtended>();
 
-        private ObservableCollection<Microsoft.ProjectOxford.Face.Controls.Face> _selectedFaces 
-            = new ObservableCollection<Microsoft.ProjectOxford.Face.Controls.Face>();
+        private ObservableCollection<Models.Face> _selectedFaces 
+            = new ObservableCollection<Models.Face>();
 
         LargePersonGroupExtended _selectedGroup;
 
@@ -134,7 +159,7 @@ namespace ClientLibrary.Controls
 
             foreach (var p in peops)
             {
-                var person = new Controls.PersonExtended { Person = p };
+                var person = new PersonExtended { Person = p };
                 person.PersonFilesDbCount = db.GetFileCountForPersonId(p.PersonId);
                 this.Dispatcher.Invoke(() =>
                 {
@@ -171,7 +196,7 @@ namespace ClientLibrary.Controls
                         var face = faceServiceClient.GetPersonFaceInLargePersonGroupAsync(SelectedGroup.Group.LargePersonGroupId, prm.Item1.Person.PersonId, prm.Item2).Result;
 
                         this.Dispatcher.Invoke(
-                            new Action<ObservableCollection<Microsoft.ProjectOxford.Face.Controls.Face>, string, PersistedFace>(UIHelper.UpdateFace),
+                            new Action<ObservableCollection<Models.Face>, string, PersistedFace>(UIHelper.UpdateFace),
                             prm.Item1.Faces,
                             face.UserData,
                             face);
@@ -361,42 +386,9 @@ namespace ClientLibrary.Controls
 
         private void btnImportGroup_Click(object sender, RoutedEventArgs e)
         {
-            //mainWindow.
+
         }
     }
 
-    public class NotNullVisibilityConverter : IValueConverter
-    {
-        object IValueConverter.Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value != null)
-            {
-                return Visibility.Visible;
-            }
-            return Visibility.Collapsed;
-        }
-
-        object IValueConverter.ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class HasItemsVisibilityConverter : IValueConverter
-    {
-        object IValueConverter.Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value != null)
-            {
-                return ((int)value) > 0 ? Visibility.Visible : Visibility.Collapsed;
-            }
-            return Visibility.Collapsed;
-        }
-
-        object IValueConverter.ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }
 

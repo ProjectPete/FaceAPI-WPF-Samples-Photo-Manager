@@ -39,7 +39,6 @@
 // enables you to show all photos containing a certain person.
 // 
 
-using ClientLibrary.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +54,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Microsoft.ProjectOxford.Face.Controls
+namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 {
     /// <summary>
     /// Interaction logic for SortMyPhotosPage.xaml

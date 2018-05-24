@@ -1,4 +1,4 @@
-namespace ClientLibrary.Data
+namespace Photo_Detect_Catalogue_Search_WPF_App.Data
 {
     using System;
     using System.Collections.Generic;
@@ -6,26 +6,21 @@ namespace ClientLibrary.Data
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
 
-    [Table("PicturePerson")]
-    public partial class PicturePerson
+    [Table("PictureFileGroupLookup")]
+    public partial class PictureFileGroupLookup
     {
-        public int Id { get; set; }
-
+        [Key]
+        [Column(Order = 0)]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int PictureFileId { get; set; }
 
-        [Required]
+        [Key]
+        [Column(Order = 1)]
         [StringLength(50)]
         public string LargePersonGroupId { get; set; }
 
-        public Guid? PersonId { get; set; }
-
-        public DateTime DateAdded { get; set; }
-
-        public string FaceJSON { get; set; }
-
-        public bool IsConfirmed { get; set; }
+        public int ProcessingState { get; set; }
 
         public virtual PictureFile PictureFile { get; set; }
-        public virtual Person Person { get; set; }
     }
 }

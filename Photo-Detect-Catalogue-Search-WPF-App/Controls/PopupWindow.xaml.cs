@@ -30,51 +30,22 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-// SCENARIO: Photo Manager. Identify and tag photos automatically.
-//
-// This scenario combines several Face API features into a fully working example
-// of a photo store management tool. With this tool, you can catalog all your
-// photos and holiday snaps. Once the AI service is sufficiently trained, the
-// hope is that it can identify and tag up to 80% of images. The tool also 
-// enables you to show all photos containing a certain person.
-// 
 
-using ClientLibrary.Controls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
-namespace Microsoft.ProjectOxford.Face.Controls
+namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 {
+    using System.Windows;
+
     /// <summary>
-    /// Interaction logic for SortMyPhotosPage.xaml
+    /// Interaction logic for PopupWindow.xaml
     /// </summary>
-    public partial class SortMyPhotosPage : Page
+    public partial class PopupWindow : Window
     {
-        public SortMyPhotosPage()
+        public PopupWindow(FrameworkElement popupControl, string title)
         {
             InitializeComponent();
-        }
-
-        private void Groups_Click(object sender, RoutedEventArgs e)
-        {
-            TheContent.Content = new ManageGroupsControl();
-        }
-
-        private void Scan_Click(object sender, RoutedEventArgs e)
-        {
-
+            grdContent.Children.Add(popupControl);
+            Title = title;
         }
     }
 }

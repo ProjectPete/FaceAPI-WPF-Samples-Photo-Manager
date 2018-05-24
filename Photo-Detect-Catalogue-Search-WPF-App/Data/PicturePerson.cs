@@ -1,4 +1,4 @@
-namespace ClientLibrary.Data
+namespace Photo_Detect_Catalogue_Search_WPF_App.Data
 {
     using System;
     using System.Collections.Generic;
