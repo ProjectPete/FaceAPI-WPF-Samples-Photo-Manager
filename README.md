@@ -9,7 +9,7 @@ https://github.com/Microsoft/Cognitive-Face-Windows
 
 There is an extra, much larger and completely working scenario added, called "Sort My Photos"
 
-This extfa scenario demonstrates and provides a working product, for managing your photo stores.
+This extra scenario demonstrates and provides a working product, for managing your photo stores.
 
 I will expand the installation and setup instructions asap, but if you know how to clone and compile the project, all you need to do is run the application and do the following:
 
