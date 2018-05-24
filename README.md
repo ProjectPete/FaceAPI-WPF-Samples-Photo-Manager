@@ -40,9 +40,9 @@ I have also already started migrating this WPF application over to a Windows Sto
 I am also planning to ask the Product Team to accept this, to be pulled on the repo above. 
 
 I publish the rough draft early, as I was asked for a quick demonstation. 
-I publish this as a Minimal Viable Product!
+So I am in effect publishing this as a "Minimal Viable Product"! :)
 
-Buffing and detailed documentation will be rolling out over the coming days.
+Code buffing, style copping and much more documentation will be rolling out over the coming days and weeks.
 
 I plan to make this sample as easy as possible for anyone to pick up and get started with.
 
