@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="PicturesDatabaseModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Person">
+          <Key>
+            <PropertyRef Name="PersonId" />
+          </Key>
+          <Property Name="PersonId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="300" Nullable="false" />
+          <Property Name="UserData" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="PictureFile">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="FilePath" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="DateAdded" Type="datetime" Nullable="false" />
+          <Property Name="DateTaken" Type="datetime" />
+          <Property Name="IsConfirmed" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="PictureFileGroupLookup">
+          <Key>
+            <PropertyRef Name="PictureFileId" />
+            <PropertyRef Name="LargePersonGroupId" />
+          </Key>
+          <Property Name="PictureFileId" Type="int" Nullable="false" />
+          <Property Name="LargePersonGroupId" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ProcessingState" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="PicturePerson">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PictureFileId" Type="int" Nullable="false" />
+          <Property Name="LargePersonGroupId" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="PersonId" Type="uniqueidentifier" />
+          <Property Name="DateAdded" Type="datetime" Nullable="false" />
+          <Property Name="FaceJSON" Type="nvarchar(max)" />
+          <Property Name="IsConfirmed" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityContainer Name="PicturesDatabaseModelStoreContainer">
+          <EntitySet Name="Person" EntityType="Self.Person" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PictureFile" EntityType="Self.PictureFile" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PictureFileGroupLookup" EntityType="Self.PictureFileGroupLookup" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PicturePerson" EntityType="Self.PicturePerson" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="PicturesDatabaseModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="PicturesDatabaseEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="PicturePersons" EntityType="PicturesDatabaseModel.PicturePerson" />
+          <EntitySet Name="PictureFiles" EntityType="PicturesDatabaseModel.PictureFile" />
+          <AssociationSet Name="PictureFilePicturePerson" Association="PicturesDatabaseModel.PictureFilePicturePerson">
+            <End Role="PictureFile" EntitySet="PictureFiles" />
+            <End Role="PicturePerson" EntitySet="PicturePersons" />
+          </AssociationSet>
+          <EntitySet Name="People" EntityType="PicturesDatabaseModel.Person" />
+          <AssociationSet Name="PersonPicturePerson" Association="PicturesDatabaseModel.PersonPicturePerson">
+            <End Role="Person" EntitySet="People" />
+            <End Role="PicturePerson" EntitySet="PicturePersons" />
+          </AssociationSet>
+          <EntitySet Name="PictureFileGroupLookups" EntityType="PicturesDatabaseModel.PictureFileGroupLookup" />
+          <AssociationSet Name="PictureFilePictureFileGroupLookup" Association="PicturesDatabaseModel.PictureFilePictureFileGroupLookup">
+            <End Role="PictureFile" EntitySet="PictureFiles" />
+            <End Role="PictureFileGroupLookup" EntitySet="PictureFileGroupLookups" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="PicturePerson">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PictureFileId" Type="Int32" Nullable="false" />
+          <Property Name="LargePersonGroupId" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="PersonId" Type="Guid" />
+          <Property Name="DateAdded" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="FaceJSON" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="IsConfirmed" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="PictureFile" Relationship="PicturesDatabaseModel.PictureFilePicturePerson" FromRole="PicturePerson" ToRole="PictureFile" />
+          <NavigationProperty Name="Person" Relationship="PicturesDatabaseModel.PersonPicturePerson" FromRole="PicturePerson" ToRole="Person" />
+        </EntityType>
+        <EntityType Name="PictureFile">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="FilePath" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="DateAdded" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="DateTaken" Type="DateTime" Precision="3" />
+          <Property Name="IsConfirmed" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="PicturePersons" Relationship="PicturesDatabaseModel.PictureFilePicturePerson" FromRole="PictureFile" ToRole="PicturePerson" />
+          <NavigationProperty Name="PictureFileGroupLookups" Relationship="PicturesDatabaseModel.PictureFilePictureFileGroupLookup" FromRole="PictureFile" ToRole="PictureFileGroupLookup" />
+        </EntityType>
+        <Association Name="PictureFilePicturePerson">
+          <End Type="PicturesDatabaseModel.PictureFile" Role="PictureFile" Multiplicity="1" />
+          <End Type="PicturesDatabaseModel.PicturePerson" Role="PicturePerson" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PictureFile">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="PicturePerson">
+              <PropertyRef Name="PictureFileId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Person">
+          <Key>
+            <PropertyRef Name="PersonId" />
+          </Key>
+          <Property Name="PersonId" Type="Guid" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="300" FixedLength="false" Unicode="true" />
+          <Property Name="UserData" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="PicturePersons" Relationship="PicturesDatabaseModel.PersonPicturePerson" FromRole="Person" ToRole="PicturePerson" />
+        </EntityType>
+        <Association Name="PersonPicturePerson">
+          <End Type="PicturesDatabaseModel.Person" Role="Person" Multiplicity="0..1" />
+          <End Type="PicturesDatabaseModel.PicturePerson" Role="PicturePerson" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Person">
+              <PropertyRef Name="PersonId" />
+            </Principal>
+            <Dependent Role="PicturePerson">
+              <PropertyRef Name="PersonId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="PictureFileGroupLookup">
+          <Key>
+            <PropertyRef Name="PictureFileId" />
+            <PropertyRef Name="LargePersonGroupId" />
+          </Key>
+          <Property Name="PictureFileId" Type="Int32" Nullable="false" />
+          <Property Name="LargePersonGroupId" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ProcessingState" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="PictureFile" Relationship="PicturesDatabaseModel.PictureFilePictureFileGroupLookup" FromRole="PictureFileGroupLookup" ToRole="PictureFile" />
+        </EntityType>
+        <Association Name="PictureFilePictureFileGroupLookup">
+          <End Type="PicturesDatabaseModel.PictureFile" Role="PictureFile" Multiplicity="1" />
+          <End Type="PicturesDatabaseModel.PictureFileGroupLookup" Role="PictureFileGroupLookup" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PictureFile">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="PictureFileGroupLookup">
+              <PropertyRef Name="PictureFileId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="PicturesDatabaseModelStoreContainer" CdmEntityContainer="PicturesDatabaseEntities">
+          <EntitySetMapping Name="PicturePersons">
+            <EntityTypeMapping TypeName="PicturesDatabaseModel.PicturePerson">
+              <MappingFragment StoreEntitySet="PicturePerson">
+                <ScalarProperty Name="IsConfirmed" ColumnName="IsConfirmed" />
+                <ScalarProperty Name="FaceJSON" ColumnName="FaceJSON" />
+                <ScalarProperty Name="DateAdded" ColumnName="DateAdded" />
+                <ScalarProperty Name="PersonId" ColumnName="PersonId" />
+                <ScalarProperty Name="LargePersonGroupId" ColumnName="LargePersonGroupId" />
+                <ScalarProperty Name="PictureFileId" ColumnName="PictureFileId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PictureFiles">
+            <EntityTypeMapping TypeName="PicturesDatabaseModel.PictureFile">
+              <MappingFragment StoreEntitySet="PictureFile">
+                <ScalarProperty Name="IsConfirmed" ColumnName="IsConfirmed" />
+                <ScalarProperty Name="DateTaken" ColumnName="DateTaken" />
+                <ScalarProperty Name="DateAdded" ColumnName="DateAdded" />
+                <ScalarProperty Name="FilePath" ColumnName="FilePath" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="People">
+            <EntityTypeMapping TypeName="PicturesDatabaseModel.Person">
+              <MappingFragment StoreEntitySet="Person">
+                <ScalarProperty Name="UserData" ColumnName="UserData" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="PersonId" ColumnName="PersonId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PictureFileGroupLookups">
+            <EntityTypeMapping TypeName="PicturesDatabaseModel.PictureFileGroupLookup">
+              <MappingFragment StoreEntitySet="PictureFileGroupLookup">
+                <ScalarProperty Name="ProcessingState" ColumnName="ProcessingState" />
+                <ScalarProperty Name="LargePersonGroupId" ColumnName="LargePersonGroupId" />
+                <ScalarProperty Name="PictureFileId" ColumnName="PictureFileId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
