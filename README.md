@@ -39,8 +39,7 @@ I have also already started migrating this WPF application over to a Windows Sto
 
 I am also planning to ask the Product Team to accept this, to be pulled on the repo above. 
 
-I publish the rough draft early, as I was asked for a quick demonstation. 
-So I am in effect publishing this as a "Minimal Viable Product"! :)
+I've been tinkering with this for several weeks, but I publish this rough draft early. I've been asked for a demo of how Face Recognition works. So I am publishing this as a "Minimal Viable Product"! :)
 
 Code buffing, style copping and much more documentation will be rolling out over the coming days and weeks.
 
@@ -49,3 +48,11 @@ I plan to make this sample as easy as possible for anyone to pick up and get sta
 Thank you Microsoft for another awesome life changer!
 
 Much more to come!
+
+Priorities:
+
+1) API limit retries needs more tidying.
+2) More detailed documentation of all the new bits
+3) UI tidying & much booiler plating
+4) Pull Request on the main/original Azure branch
+5) Finish and publish as a free App on Microsoft Store
