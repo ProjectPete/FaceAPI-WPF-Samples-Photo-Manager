@@ -52,8 +52,9 @@ Much more to come!
 Priorities:
 
 1) API limit retries needs more tidying.
-2) More detailed documentation of all the new bits
-3) UI tidying & much booiler plating
-4) Once the AI is good enough, Add a "first pass" option, which speeds through without user confirmation. It will attenpt to identify or best-guess as many people as it can. The ultimate goal is for this to take 70-80% of the pain out of having to manually tag every image, which other photo apps need you to do.
-4) Pull Request on the main/original Azure branch
-5) Finish and publish as a free App on Microsoft Store
+2) Convert database provider layer into code first, localDb and even an XML/JSON version.
+3) More detailed documentation of all the new bits
+4) UI tidying & much booiler plating
+5) Once the AI is good enough, Add a "first pass" option, which speeds through without user confirmation. It will attenpt to identify or best-guess as many people as it can. The ultimate goal is for this to take 70-80% of the pain out of having to manually tag every image, which other photo apps need you to do.
+6) Pull Request on the main/original Azure branch
+7) Finish and publish as a free App on Microsoft Store
