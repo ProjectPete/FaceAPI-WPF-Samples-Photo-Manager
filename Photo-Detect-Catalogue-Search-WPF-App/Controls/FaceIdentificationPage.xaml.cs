@@ -46,27 +46,28 @@
 //   ../Laker/Laker-Sally/Laker-Sally2.jpg
 
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-
-using ClientContract = Microsoft.ProjectOxford.Face.Contract;
-using System.Windows.Media;
-using Microsoft.ProjectOxford.Face.Contract;
-using Microsoft.ProjectOxford.Face;
-
 namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Windows;
+    using System.Windows.Controls;
+    using ClientContract = Microsoft.ProjectOxford.Face.Contract;
+    using System.Windows.Media;
+    using Microsoft.ProjectOxford.Face.Contract;
+    using Microsoft.ProjectOxford.Face;
+    using Photo_Detect_Catalogue_Search_WPF_App.Helpers;
+    using Newtonsoft.Json.Serialization;
+
     /// <summary>
     /// Interaction logic for FaceDetection.xaml
     /// </summary>
@@ -104,6 +105,8 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
         /// </summary>
         private int _maxConcurrentProcesses;
 
+        private MainWindowLogTraceWriter _mainWindowLogTraceWriter;
+
         #endregion Fields
 
         #region Constructors
@@ -115,6 +118,8 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
         {
             InitializeComponent();
             _maxConcurrentProcesses = 4;
+
+            _mainWindowLogTraceWriter = new MainWindowLogTraceWriter();
         }
 
         #endregion Constructors
@@ -322,20 +327,13 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 
                     // Call create person REST API, the new create person id will be returned
                     MainWindow.Log("Request: Creating person \"{0}\"", p.PersonName);
+                    
+                    p.PersonId = (await RetryHelper.OperationWithBasicRetryAsync(async () => await 
+                        faceServiceClient.CreatePersonInLargePersonGroupAsync(this.GroupId, p.PersonName, dir), 
+                        new[] { typeof(FaceAPIException) },
+                        traceWriter:_mainWindowLogTraceWriter
+                        )).PersonId.ToString();
 
-                    while (true)
-                    {
-                        try
-                        {
-                            p.PersonId = (await faceServiceClient.CreatePersonInLargePersonGroupAsync(this.GroupId, p.PersonName, dir)).PersonId.ToString();
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            MainWindow.Log($"Error: {ex.Message}, retrying");
-                            await Task.Delay(1000);
-                        }
-                    }
                     MainWindow.Log("Response: Success. Person \"{0}\" (PersonID:{1}) created", p.PersonName, p.PersonId);
 
                     string img;
@@ -431,7 +429,13 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
                 {
                     // Start train large person group
                     MainWindow.Log("Request: Training group \"{0}\"", this.GroupId);
-                    await faceServiceClient.TrainLargePersonGroupAsync(this.GroupId);
+
+                    await RetryHelper.VoidOperationWithBasicRetryAsync(() =>
+                        faceServiceClient.TrainLargePersonGroupAsync(this.GroupId),
+                        new[] { typeof(FaceAPIException) },
+                        traceWriter: _mainWindowLogTraceWriter);
+
+                    //await faceServiceClient.TrainLargePersonGroupAsync(this.GroupId);
 
                     // Wait until train completed
                     while (true)
@@ -489,7 +493,12 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
                 {
                     try
                     {
-                        var faces = await faceServiceClient.DetectAsync(fStream);
+                        var faces = await RetryHelper.OperationWithBasicRetryAsync(async () => await
+                            faceServiceClient.DetectAsync(fStream),
+                            new[] { typeof(FaceAPIException) },
+                            traceWriter: _mainWindowLogTraceWriter);
+
+                        //var faces = await faceServiceClient.DetectAsync(fStream);
 
                         // Convert detection result into UI binding object for rendering
                         foreach (var face in UIHelper.CalculateFaceRectangleForRendering(faces, MaxImageSize, imageInfo))
@@ -501,7 +510,14 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 
                         // Identify each face
                         // Call identify REST API, the result contains identified person information
-                        var identifyResult = await faceServiceClient.IdentifyAsync(faces.Select(ff => ff.FaceId).ToArray(), largePersonGroupId: this.GroupId);
+
+                        var identifyResult = await RetryHelper.OperationWithBasicRetryAsync(async () => await
+                            faceServiceClient.IdentifyAsync(faces.Select(ff => ff.FaceId).ToArray(), largePersonGroupId: this.GroupId),
+                            new[] { typeof(FaceAPIException) },
+                            traceWriter: _mainWindowLogTraceWriter);
+
+                        //var identifyResult = await faceServiceClient.IdentifyAsync(faces.Select(ff => ff.FaceId).ToArray(), largePersonGroupId: this.GroupId);
+
                         for (int idx = 0; idx < faces.Length; idx++)
                         {
                             // Update identification result for rendering

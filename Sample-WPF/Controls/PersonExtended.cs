@@ -1,5 +1,4 @@
-﻿using ClientLibrary.Data;
-using Microsoft.ProjectOxford.Face.Contract;
+﻿using Microsoft.ProjectOxford.Face.Contract;
 using Microsoft.ProjectOxford.Face.Controls;
 using System;
 using System.Collections.Generic;

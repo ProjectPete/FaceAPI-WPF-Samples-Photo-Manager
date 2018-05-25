@@ -1,10 +1,42 @@
-﻿
+﻿//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license.
+//
+// Microsoft Cognitive Services (formerly Project Oxford): https://www.microsoft.com/cognitive-services
+//
+// Microsoft Cognitive Services (formerly Project Oxford) GitHub:
+// https://github.com/Microsoft/Cognitive-Face-Windows
+//
+// Copyright (c) Microsoft Corporation
+// All rights reserved.
+//
+// MIT License:
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 
 namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 {
     using Microsoft.ProjectOxford.Face;
     using Microsoft.ProjectOxford.Face.Contract;
     using Photo_Detect_Catalogue_Search_WPF_App.Data;
+    using Photo_Detect_Catalogue_Search_WPF_App.Helpers;
     using Photo_Detect_Catalogue_Search_WPF_App.Models;
     using System;
     using System.Collections.Concurrent;
@@ -26,22 +58,92 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
     /// </summary>
     public partial class ScanFolderControl : UserControl, INotifyPropertyChanged
     {
+        /// <summary>
+        /// The selected folder
+        /// </summary>
         private string _selectedFolder;
+
+        /// <summary>
+        /// The files count
+        /// </summary>
         private int _filesCount;
+
+        /// <summary>
+        /// The files
+        /// </summary>
         private Queue<string> _files;
+
+        /// <summary>
+        /// The can scan
+        /// </summary>
         private bool _canScan;
+
+        /// <summary>
+        /// The scan group
+        /// </summary>
         private LargePersonGroupExtended _scanGroup;
+
+        /// <summary>
+        /// The detected faces
+        /// </summary>
         private ObservableCollection<Models.Face> _detectedFaces = new ObservableCollection<Models.Face>();
+
+        /// <summary>
+        /// The result collection
+        /// </summary>
         private ObservableCollection<Models.Face> _resultCollection = new ObservableCollection<Models.Face>();
+
+        /// <summary>
+        /// The selected file
+        /// </summary>
         private ImageSource _selectedFile;
+
+        /// <summary>
+        /// The selected file path
+        /// </summary>
         private string _selectedFilePath;
+
+        /// <summary>
+        /// The is dragging
+        /// </summary>
         private bool _isDragging;
+
+        /// <summary>
+        /// The select rectangle
+        /// </summary>
         private Rectangle _selectRectangle;
+
+        /// <summary>
+        /// The select rectangle start point
+        /// </summary>
         private Point _selectRectangleStartPoint;
+
+        /// <summary>
+        /// The database
+        /// </summary>
         private Data.SqlDataProvider db = new Data.SqlDataProvider();
-        private FaceServiceClient faceServiceClient;
+
+        /// <summary>
+        /// The face service client
+        /// </summary>
+        private FaceServiceClient _faceServiceClient;
+
+        /// <summary>
+        /// The main window
+        /// </summary>
         private MainWindow _mainWindow;
 
+        /// <summary>
+        /// The main window log trace writer
+        /// </summary>
+        private MainWindowLogTraceWriter _mainWindowLogTraceWriter;
+
+        /// <summary>
+        /// Gets or sets the select rectangle.
+        /// </summary>
+        /// <value>
+        /// The select rectangle.
+        /// </value>
         public Rectangle SelectRectangle
         {
             get
@@ -60,6 +162,12 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Gets or sets the files count.
+        /// </summary>
+        /// <value>
+        /// The files count.
+        /// </value>
         public int FilesCount
         {
             get
@@ -78,6 +186,12 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Gets or sets the files.
+        /// </summary>
+        /// <value>
+        /// The files.
+        /// </value>
         public Queue<string> Files
         {
             get
@@ -96,6 +210,12 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Gets or sets the seleceted folder.
+        /// </summary>
+        /// <value>
+        /// The seleceted folder.
+        /// </value>
         public string SelecetedFolder
         {
             get
@@ -114,6 +234,12 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance can scan.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance can scan; otherwise, <c>false</c>.
+        /// </value>
         public bool CanScan
         {
             get
@@ -130,6 +256,13 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
                 }
             }
         }
+
+        /// <summary>
+        /// Gets or sets the scan group.
+        /// </summary>
+        /// <value>
+        /// The scan group.
+        /// </value>
         public LargePersonGroupExtended ScanGroup
         {
             get
@@ -147,6 +280,12 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Gets the detected faces.
+        /// </summary>
+        /// <value>
+        /// The detected faces.
+        /// </value>
         public ObservableCollection<Models.Face> DetectedFaces
         {
             get
@@ -155,22 +294,39 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScanFolderControl"/> class.
+        /// </summary>
+        /// <param name="group">The group.</param>
+        /// <param name="mainWindow">The main window.</param>
         public ScanFolderControl(LargePersonGroupExtended group, MainWindow mainWindow)
         {
             _scanGroup = group;
             _mainWindow = mainWindow;
+            _mainWindowLogTraceWriter = new MainWindowLogTraceWriter();
             InitializeComponent();
             Loaded += ScanFolderControl_Loaded;
         }
 
+        /// <summary>
+        /// Handles the Loaded event of the ScanFolderControl control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void ScanFolderControl_Loaded(object sender, RoutedEventArgs e)
         {
             string subscriptionKey = _mainWindow._scenariosControl.SubscriptionKey;
             string endpoint = _mainWindow._scenariosControl.SubscriptionEndpoint;
 
-            faceServiceClient = new FaceServiceClient(subscriptionKey, endpoint);
+            _faceServiceClient = new FaceServiceClient(subscriptionKey, endpoint);
         }
 
+        /// <summary>
+        /// Gets or sets the selected file.
+        /// </summary>
+        /// <value>
+        /// The selected file.
+        /// </value>
         public ImageSource SelectedFile
         {
             get
@@ -188,6 +344,12 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Gets the result collection.
+        /// </summary>
+        /// <value>
+        /// The result collection.
+        /// </value>
         public ObservableCollection<Models.Face> ResultCollection
         {
             get
@@ -196,6 +358,12 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Gets the maximum size of the image.
+        /// </summary>
+        /// <value>
+        /// The maximum size of the image.
+        /// </value>
         public int MaxImageSize
         {
             get
@@ -204,8 +372,16 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Handles the Click event of the BtnFolderSelect control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void BtnFolderSelect_Click(object sender, RoutedEventArgs e)
         {
             using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
@@ -224,11 +400,19 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the BtnScan control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void BtnScan_Click(object sender, RoutedEventArgs e)
         {
             GetNextFile();
         }
 
+        /// <summary>
+        /// Gets the next file.
+        /// </summary>
         private void GetNextFile()
         {
             DetectedFaces.Clear();
@@ -247,6 +431,10 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             MainWindow.Log("No more files in this folder to process");
         }
 
+        /// <summary>
+        /// Processes the file.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
         private async void ProcessFile(string filePath)
         {
             _selectedFilePath = filePath;
@@ -255,22 +443,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             {
                 try
                 {
-                    Microsoft.ProjectOxford.Face.Contract.Face[] faces;
-
-                    while (true)
-                    {
-                        try
-                        {
-                            faces = await faceServiceClient.DetectAsync(fStream, false, true, new FaceAttributeType[] { FaceAttributeType.Gender, FaceAttributeType.Age, FaceAttributeType.Smile, FaceAttributeType.Glasses, FaceAttributeType.HeadPose, FaceAttributeType.FacialHair, FaceAttributeType.Emotion, FaceAttributeType.Hair, FaceAttributeType.Makeup, FaceAttributeType.Occlusion, FaceAttributeType.Accessories, FaceAttributeType.Noise, FaceAttributeType.Exposure, FaceAttributeType.Blur });
-                            break;
-                        }
-                        catch (Exception exc)
-                        {
-                            MainWindow.Log($"Error: {exc.Message}");
-                            await Task.Delay(1000);
-                            // retry
-                        }
-                    }
+                    var faces = await RetryHelper.OperationWithBasicRetryAsync(async () => await
+                        _faceServiceClient.DetectAsync(fStream, false, true, new FaceAttributeType[] { FaceAttributeType.Gender, FaceAttributeType.Age, FaceAttributeType.Smile, FaceAttributeType.Glasses, FaceAttributeType.HeadPose, FaceAttributeType.FacialHair, FaceAttributeType.Emotion, FaceAttributeType.Hair, FaceAttributeType.Makeup, FaceAttributeType.Occlusion, FaceAttributeType.Accessories, FaceAttributeType.Noise, FaceAttributeType.Exposure, FaceAttributeType.Blur }),
+                        new[] { typeof(FaceAPIException) },
+                        traceWriter: _mainWindowLogTraceWriter);
+                    
                     MainWindow.Log("Response: Success. Detected {0} face(s) in {1}", faces.Length, filePath);
                     
                     if (faces.Length == 0)
@@ -319,24 +496,12 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
                     }
 
                     // Start train large person group
-
-                    while (true)
-                    {
-                        await Task.Delay(1000);
-
-                        try // Temporary
-                        {
-                            MainWindow.Log("Request: Training group \"{0}\"", _scanGroup.Group.LargePersonGroupId);
-                            await faceServiceClient.TrainLargePersonGroupAsync(_scanGroup.Group.LargePersonGroupId);
-                            break;
-                        }
-                        catch (Exception exc)
-                        {
-                            MainWindow.Log($"Error: {exc.Message}");
-                            // retry
-                        }
-                    }
-
+                    MainWindow.Log("Request: Training group \"{0}\"", _scanGroup.Group.LargePersonGroupId);
+                    await RetryHelper.VoidOperationWithBasicRetryAsync(() =>
+                        _faceServiceClient.TrainLargePersonGroupAsync(_scanGroup.Group.LargePersonGroupId),
+                        new[] { typeof(FaceAPIException) },
+                        traceWriter: _mainWindowLogTraceWriter);
+                    
                     // Wait until train completed
                     while (true)
                     {
@@ -344,7 +509,7 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 
                         try // Temporary
                         {
-                            var status = await faceServiceClient.GetLargePersonGroupTrainingStatusAsync(_scanGroup.Group.LargePersonGroupId);
+                            var status = await _faceServiceClient.GetLargePersonGroupTrainingStatusAsync(_scanGroup.Group.LargePersonGroupId);
                             MainWindow.Log("Response: {0}. Group \"{1}\" training process is {2}", "Success", _scanGroup.Group.LargePersonGroupId, status.Status);
                             if (status.Status != Microsoft.ProjectOxford.Face.Contract.Status.Running)
                             {
@@ -358,7 +523,7 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
                         }
                     }
 
-                    await GoGetMatches(faceServiceClient);
+                    await GoGetMatches();
 
                 }
                 catch (FaceAPIException ex)
@@ -373,11 +538,20 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             btnNext.IsEnabled = true;
         }
 
-        private async Task GoGetMatches(FaceServiceClient faceServiceClient)
+        /// <summary>
+        /// Goes the get matches.
+        /// </summary>
+        /// <returns></returns>
+        private async Task GoGetMatches()
         {
             // Identify each face
             // Call identify REST API, the result contains identified person information
-            var identifyResult = await faceServiceClient.IdentifyAsync(_detectedFaces.Select(ff => new Guid(ff.FaceId)).ToArray(), largePersonGroupId: this._scanGroup.Group.LargePersonGroupId);
+            //var identifyResult = await _faceServiceClient.IdentifyAsync(_detectedFaces.Select(ff => new Guid(ff.FaceId)).ToArray(), largePersonGroupId: this._scanGroup.Group.LargePersonGroupId);
+            var identifyResult = await RetryHelper.OperationWithBasicRetryAsync(async () => await
+                _faceServiceClient.IdentifyAsync(_detectedFaces.Select(ff => new Guid(ff.FaceId)).ToArray(), largePersonGroupId: this._scanGroup.Group.LargePersonGroupId),
+                new[] { typeof(FaceAPIException) },
+                traceWriter: _mainWindowLogTraceWriter);
+
             for (int idx = 0; idx < _detectedFaces.Count; idx++)
             {
                 // Update identification result for rendering
@@ -406,6 +580,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 
         }
 
+        /// <summary>
+        /// Gets the hair.
+        /// </summary>
+        /// <param name="hair">The hair.</param>
+        /// <returns></returns>
         private string GetHair(Hair hair)
         {
             if (hair.HairColor.Length == 0)
@@ -433,6 +612,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Gets the accessories.
+        /// </summary>
+        /// <param name="accessories">The accessories.</param>
+        /// <returns></returns>
         private string GetAccessories(Accessory[] accessories)
         {
             if (accessories.Length == 0)
@@ -450,6 +634,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             return "Accessories: " + String.Join(",", accessoryArray);
         }
 
+        /// <summary>
+        /// Gets the emotion.
+        /// </summary>
+        /// <param name="emotion">The emotion.</param>
+        /// <returns></returns>
         private string GetEmotion(Microsoft.ProjectOxford.Common.Contract.EmotionScores emotion)
         {
             string emotionType = string.Empty;
@@ -497,6 +686,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             return $"{emotionType}";
         }
 
+        /// <summary>
+        /// Handles the MouseDown event of the imgCurrent control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void imgCurrent_MouseDown(object sender, MouseButtonEventArgs e)
         {
             canvDrag.Children.Clear();
@@ -510,6 +704,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             canvDrag.Children.Add(SelectRectangle);
         }
 
+        /// <summary>
+        /// Handles the MouseMove event of the imgCurrent control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
         private void imgCurrent_MouseMove(object sender, MouseEventArgs e)
         {
             if (_isDragging)
@@ -522,8 +721,6 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
                 {
                     return;
                 }
-                //width = width == 0 ? 1 : width;
-                //height = height == 0 ? 1 : height;
 
                 if (width > 0)
                 {
@@ -549,12 +746,22 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Handles the MouseLeave event of the imgCurrent control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
         private void imgCurrent_MouseLeave(object sender, MouseEventArgs e)
         {
             _isDragging = false;
             canvDrag.Children.Clear();
         }
 
+        /// <summary>
+        /// Handles the MouseUp event of the imgCurrent control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void imgCurrent_MouseUp(object sender, MouseButtonEventArgs e)
         {
             var scale = ((1 / imgCurrent.Source.Width) * imgCurrent.ActualWidth);
@@ -564,6 +771,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             canvDrag.Children.Clear();
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnSave control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
             var file = new PictureFile { DateAdded = DateTime.Now, FilePath = _selectedFilePath, IsConfirmed = true };
@@ -604,6 +816,15 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             GetNextFile();
         }
 
+        /// <summary>
+        /// Crops an image to square.
+        /// </summary>
+        /// <param name="oldFilename">The old filename.</param>
+        /// <param name="fileName">Name of the file.</param>
+        /// <param name="left">The left position.</param>
+        /// <param name="top">The top position.</param>
+        /// <param name="width">The width.</param>
+        /// <param name="height">The height.</param>
         private void CropToSquare(string oldFilename, string fileName, int left, int top, int width, int height)
         {
             // Create a new image at the cropped size
@@ -624,6 +845,13 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Adds the face to a LargePersonGroup.
+        /// </summary>
+        /// <param name="largePersonGroupId">The large person group identifier.</param>
+        /// <param name="imgPath">The img path.</param>
+        /// <param name="PersonId">The person identifier.</param>
+        /// <returns></returns>
         private async Task AddFaceToLargePersonGroup(string largePersonGroupId, string imgPath, Guid PersonId)
         {
             var imageList = new ConcurrentBag<string>(new [] { imgPath });
@@ -637,7 +865,7 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
                     {
                         //face.image.Save(m, image.RawFormat);
                         // Update person faces on server side
-                        var persistFace = await faceServiceClient.AddPersonFaceInLargePersonGroupAsync(largePersonGroupId, PersonId, fStream, img);
+                        var persistFace = await _faceServiceClient.AddPersonFaceInLargePersonGroupAsync(largePersonGroupId, PersonId, fStream, img);
                         return;
                     }
                     catch (FaceAPIException ex)
@@ -668,7 +896,12 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
-        private void btnRemove_Click_1(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Handles the 1 event of the btnRemove_Click control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        private void btnRemove_Click(object sender, RoutedEventArgs e)
         {
             var ctrl = sender as Button;
 
@@ -676,6 +909,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             DetectedFaces.Remove(f);
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnNext control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void btnNext_Click(object sender, RoutedEventArgs e)
         {
             GetNextFile();

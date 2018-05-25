@@ -30,30 +30,30 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-// SCENARIO: Photo Manager. Identify and tag photos automatically.
-//
-// This scenario combines several Face API features into a fully working example
-// of a photo store management tool. With this tool, you can catalog all your
-// photos and holiday snaps. Once the AI service is sufficiently trained, the
-// hope is that it can identify and tag up to 80% of images. The tool also 
-// enables you to show all photos containing a certain person.
-// 
 
-namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
+namespace Photo_Detect_Catalogue_Search_WPF_App.Helpers
 {
-    using System.Windows.Controls;
+    using Newtonsoft.Json.Serialization;
+    using System;
+    using System.Diagnostics;
 
-    /// <summary>
-    /// Interaction logic for SortMyPhotosPage.xaml
-    /// </summary>
-    public partial class SortMyPhotosPage : Page
+    class MainWindowLogTraceWriter : ITraceWriter
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SortMyPhotosPage"/> class.
-        /// </summary>
-        public SortMyPhotosPage()
+        private TraceLevel _levelFilter;
+
+        public MainWindowLogTraceWriter(TraceLevel levelFilter = TraceLevel.Verbose)
         {
-            InitializeComponent();
+            _levelFilter = levelFilter;
+        }
+
+        public TraceLevel LevelFilter
+        {
+            get { return _levelFilter; }
+        }
+
+        public void Trace(TraceLevel level, string message, Exception ex)
+        {
+            MainWindow.Log(message);
         }
     }
 }

@@ -31,19 +31,19 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Microsoft.ProjectOxford.Face.Contract;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-
 namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 {
+    using Microsoft.ProjectOxford.Face.Contract;
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Drawing;
+    using System.IO;
+    using System.Linq;
+    using System.Windows;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+
     /// <summary>
     /// UI helper functions
     /// </summary>
@@ -83,6 +83,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Bitmaps to image source.
+        /// </summary>
+        /// <param name="bitmap">The bitmap.</param>
+        /// <returns></returns>
         private static BitmapImage BitmapToImageSource(Bitmap bitmap)
         {
             using (MemoryStream memory = new MemoryStream())
@@ -99,6 +104,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Bitmaps from writeable bitmap.
+        /// </summary>
+        /// <param name="writeBmp">The write BMP.</param>
+        /// <returns></returns>
         private static Bitmap BitmapFromWriteableBitmap(WriteableBitmap writeBmp)
         {
             Bitmap bmp;
@@ -111,24 +121,7 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
             return bmp;
         }
-
-        public static BitmapImage ConvertWriteableBitmapToBitmapImage(WriteableBitmap wbm)
-        {
-            BitmapImage bmImage = new BitmapImage();
-            using (MemoryStream stream = new MemoryStream())
-            {
-                PngBitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(wbm));
-                encoder.Save(stream);
-                bmImage.BeginInit();
-                bmImage.CacheOption = BitmapCacheOption.OnLoad;
-                bmImage.StreamSource = stream;
-                bmImage.EndInit();
-                bmImage.Freeze();
-            }
-            return bmImage;
-        }
-
+        
         /// <summary>
         /// Get image orientation flag.
         /// </summary>

@@ -42,7 +42,7 @@ namespace ClientLibrary.Controls
         private Rectangle _selectRectangle;
         private Point _selectRectangleStartPoint;
         private SqlDataProvider db = new SqlDataProvider();
-        private FaceServiceClient kfaceServiceClient;
+        private FaceServiceClient faceServiceClient;
         private MainWindow _mainWindow;
 
         public Rectangle SelectRectangle

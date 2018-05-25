@@ -35,6 +35,7 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
 {
     using Microsoft.ProjectOxford.Face;
     using Microsoft.ProjectOxford.Face.Contract;
+    using Photo_Detect_Catalogue_Search_WPF_App.Helpers;
     using Photo_Detect_Catalogue_Search_WPF_App.Models;
     using System;
     using System.Collections.Concurrent;
@@ -57,35 +58,57 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
         /// <summary>
         /// The number of faces to pull
         /// </summary>
-        private const int NumberOfFacesToPull = 5;
+        private const int _numberOfFacesToPull = 5;
 
         /// <summary>
         /// The face service client
         /// </summary>
-        private FaceServiceClient faceServiceClient;
+        private FaceServiceClient _faceServiceClient;
 
         /// <summary>
         /// The main window
         /// </summary>
-        private MainWindow mainWindow;
+        private MainWindow _mainWindow;
 
         /// <summary>
         /// The database provider layer
         /// </summary>
-        private Data.SqlDataProvider db = new Data.SqlDataProvider();
+        private Data.SqlDataProvider _db = new Data.SqlDataProvider();
 
         /// <summary>
         /// max concurrent process number for client query.
         /// </summary>
         private int _maxConcurrentProcesses;
 
+        /// <summary>
+        /// The face groups
+        /// </summary>
         private ObservableCollection<LargePersonGroupExtended> _faceGroups = new ObservableCollection<LargePersonGroupExtended>();
 
+        /// <summary>
+        /// The selected faces
+        /// </summary>
         private ObservableCollection<Models.Face> _selectedFaces 
             = new ObservableCollection<Models.Face>();
 
-        LargePersonGroupExtended _selectedGroup;
+        /// <summary>
+        /// The selected group
+        /// </summary>
+        private LargePersonGroupExtended _selectedGroup;
 
+        /// <summary>
+        /// The main window log trace writer
+        /// </summary>
+        private MainWindowLogTraceWriter _mainWindowLogTraceWriter;
+
+
+
+        /// <summary>
+        /// Gets the face groups.
+        /// </summary>
+        /// <value>
+        /// The face groups.
+        /// </value>
         public ObservableCollection<LargePersonGroupExtended> FaceGroups
         {
             get
@@ -94,6 +117,12 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Gets or sets the selected group.
+        /// </summary>
+        /// <value>
+        /// The selected group.
+        /// </value>
         public LargePersonGroupExtended SelectedGroup
         {
             get
@@ -112,18 +141,25 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Checks the people in database.
+        /// </summary>
         private void CheckPeopleInDatabase()
         {
             foreach(var person in SelectedGroup.GroupPersons)
             {
-                var dbPerson = db.GetPerson(person.Person.PersonId);
+                var dbPerson = _db.GetPerson(person.Person.PersonId);
                 if (dbPerson == null)
                 {
-                    db.AddPerson(person.Person.PersonId, person.Person.Name, person.Person.UserData);
+                    _db.AddPerson(person.Person.PersonId, person.Person.Name, person.Person.UserData);
                 }
             }
         }
 
+        /// <summary>
+        /// Gets the people for selected group.
+        /// </summary>
+        /// <returns></returns>
         private async Task GetPeopleForSelectedGroup()
         {
             if (SelectedGroup == null)
@@ -141,7 +177,7 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
                 try
                 {
                     // ListPersonsInLargePersonGroupAsync also has skip/take overrides
-                    peops = await faceServiceClient.ListPersonsInLargePersonGroupAsync(SelectedGroup.Group.LargePersonGroupId);
+                    peops = await _faceServiceClient.ListPersonsInLargePersonGroupAsync(SelectedGroup.Group.LargePersonGroupId);
                     break;
                 }
                 catch (Exception e)
@@ -160,7 +196,7 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             foreach (var p in peops)
             {
                 var person = new PersonExtended { Person = p };
-                person.PersonFilesDbCount = db.GetFileCountForPersonId(p.PersonId);
+                person.PersonFilesDbCount = _db.GetFileCountForPersonId(p.PersonId);
                 this.Dispatcher.Invoke(() =>
                 {
                     SelectedGroup.GroupPersons.Add(person);
@@ -193,7 +229,7 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
                     var prm = (Tuple<PersonExtended, Guid>)inParams;
                     try
                     {
-                        var face = faceServiceClient.GetPersonFaceInLargePersonGroupAsync(SelectedGroup.Group.LargePersonGroupId, prm.Item1.Person.PersonId, prm.Item2).Result;
+                        var face = _faceServiceClient.GetPersonFaceInLargePersonGroupAsync(SelectedGroup.Group.LargePersonGroupId, prm.Item1.Person.PersonId, prm.Item2).Result;
 
                         this.Dispatcher.Invoke(
                             new Action<ObservableCollection<Models.Face>, string, PersistedFace>(UIHelper.UpdateFace),
@@ -233,78 +269,106 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             return;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ManageGroupsControl"/> class.
+        /// </summary>
         public ManageGroupsControl()
         {
             InitializeComponent();
-            Loaded += ManageGroupsControl_Loaded;
+            _mainWindowLogTraceWriter = new MainWindowLogTraceWriter();
             _maxConcurrentProcesses = 4;
+            Loaded += ManageGroupsControl_Loaded;
         }
 
+        /// <summary>
+        /// Handles the Loaded event of the ManageGroupsControl control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private async void ManageGroupsControl_Loaded(object sender, RoutedEventArgs e)
         {
-            mainWindow = Window.GetWindow(this) as MainWindow;
-            string subscriptionKey = mainWindow._scenariosControl.SubscriptionKey;
-            string endpoint = mainWindow._scenariosControl.SubscriptionEndpoint;
+            _mainWindow = Window.GetWindow(this) as MainWindow;
+            string subscriptionKey = _mainWindow._scenariosControl.SubscriptionKey;
+            string endpoint = _mainWindow._scenariosControl.SubscriptionEndpoint;
 
-            faceServiceClient = new FaceServiceClient(subscriptionKey, endpoint);
+            _faceServiceClient = new FaceServiceClient(subscriptionKey, endpoint);
 
             await LoadGroups();
         }
 
+        /// <summary>
+        /// Loads the groups.
+        /// </summary>
+        /// <returns></returns>
         private async Task LoadGroups()
         {
-            var tries = 30;
             FaceGroups.Clear();
 
-            while (tries-- > 0)
+            var groups = await RetryHelper.OperationWithBasicRetryAsync(async () => await
+                _faceServiceClient.ListLargePersonGroupsAsync(),
+                new[] { typeof(FaceAPIException) },
+                traceWriter: _mainWindowLogTraceWriter);
+
+            foreach (var grp in groups)
             {
-                try
-                {
-                    var groups = await faceServiceClient.ListLargePersonGroupsAsync();
-                    foreach (var grp in groups)
-                    {
-                        FaceGroups.Add(new LargePersonGroupExtended { Group = grp });
-                    }
-                    MainWindow.Log("Found {0} groups.", groups.Length);
-                    break;
-                }
-                catch (Exception exc)
-                {
-                    MainWindow.Log($"Error loading groups: {exc.Message}. Retry in 1 second.");
-                    await Task.Delay(1000);
-                }
+                FaceGroups.Add(new LargePersonGroupExtended { Group = grp });
             }
-            if (tries == 0)
-            {
-                MainWindow.Log($"Failed to load the groups after 30 tries.");
-            }
+
+            MainWindow.Log("Found {0} groups.", groups.Length);
         }
 
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Handles the Click event of the btnFolderScan control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void btnFolderScan_Click(object sender, RoutedEventArgs e)
         {
             var person = SelectedGroup.SelectedPerson;
-            var ctrl = new ScanFolderControl(_selectedGroup, mainWindow);
+            var ctrl = new ScanFolderControl(_selectedGroup, _mainWindow);
             var win = new PopupWindow(ctrl, $"Scan folders for matches with {_selectedGroup.Group.Name}");
             win.Show();
-
-            //page.ContentGrid.Content = new ScanFolderControl(_selectedGroup);
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnAddGroup control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private async void btnAddGroup_Click(object sender, RoutedEventArgs e)
         {
             var groupId = Guid.NewGuid().ToString();
-            await faceServiceClient.CreateLargePersonGroupAsync(groupId, groupId);
+
+            //await faceServiceClient.CreateLargePersonGroupAsync(groupId, groupId);
+            await RetryHelper.VoidOperationWithBasicRetryAsync(() =>
+                _faceServiceClient.CreateLargePersonGroupAsync(groupId, groupId),
+                new[] { typeof(FaceAPIException) },
+                traceWriter: _mainWindowLogTraceWriter);
+            
             await LoadGroups();
             SelectedGroup = FaceGroups.Where(a => a.Group.LargePersonGroupId == groupId).SingleOrDefault();
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnUpdateGroup control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private async void btnUpdateGroup_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                await faceServiceClient.UpdateLargePersonGroupAsync(SelectedGroup.Group.LargePersonGroupId, SelectedGroup.Group.Name, SelectedGroup.Group.UserData);
+                //await faceServiceClient.UpdateLargePersonGroupAsync(SelectedGroup.Group.LargePersonGroupId, SelectedGroup.Group.Name, SelectedGroup.Group.UserData);
+                await RetryHelper.VoidOperationWithBasicRetryAsync(() =>
+                    _faceServiceClient.UpdateLargePersonGroupAsync(SelectedGroup.Group.LargePersonGroupId, SelectedGroup.Group.Name, SelectedGroup.Group.UserData),
+                    new[] { typeof(FaceAPIException) },
+                    traceWriter: _mainWindowLogTraceWriter);
+
                 MainWindow.Log($"Changes to the selected group were saved successfully");
             }
             catch (Exception ex)
@@ -313,6 +377,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnDeleteGroup control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private async void btnDeleteGroup_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show("Are you sure you want to delete this group and database matches?", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo);
@@ -320,26 +389,16 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             {
                 try
                 {
-                    while(true)
-                    {
-                        try
-                        {
-                            await faceServiceClient.DeleteLargePersonGroupAsync(SelectedGroup.Group.LargePersonGroupId);
-                            break;
-                        }
-                        catch (Exception ex)
-                        {
-                            MainWindow.Log($"Error deleting group: {ex.Message}, retrying");
-                            await Task.Delay(1000);
-                        }
-                    }
-                    db.RemovePersonsForGroup(SelectedGroup.Group.LargePersonGroupId);
-                    //Dispatcher.Invoke(() => 
-                    //{
-                        FaceGroups.Remove(SelectedGroup);
-                        SelectedGroup = null;
-                        MainWindow.Log($"Selected group deleted successfully");
-                  //  });
+                    await RetryHelper.VoidOperationWithBasicRetryAsync(() =>
+                        _faceServiceClient.DeleteLargePersonGroupAsync(SelectedGroup.Group.LargePersonGroupId),
+                        new[] { typeof(FaceAPIException) },
+                        traceWriter: _mainWindowLogTraceWriter);
+
+                    _db.RemovePersonsForGroup(SelectedGroup.Group.LargePersonGroupId);
+                    
+                    FaceGroups.Remove(SelectedGroup);
+                    SelectedGroup = null;
+                    MainWindow.Log($"Selected group deleted successfully");
                 }
                 catch (Exception ex)
                 {
@@ -348,6 +407,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnShowFiles control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void btnShowFiles_Click(object sender, RoutedEventArgs e)
         {
             var person = SelectedGroup.SelectedPerson;
@@ -363,7 +427,7 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             var maxAvailable = person.Person.PersistedFaceIds.Count();
             if (alreadyTaken < maxAvailable)
             {
-                var guidList = new ConcurrentBag<Guid>(person.Person.PersistedFaceIds.Skip(alreadyTaken).Take(NumberOfFacesToPull));
+                var guidList = new ConcurrentBag<Guid>(person.Person.PersistedFaceIds.Skip(alreadyTaken).Take(_numberOfFacesToPull));
                 await GetFacesFromServerAsync(person, guidList);
             }
             else
@@ -372,6 +436,11 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             }
         }
 
+        /// <summary>
+        /// Handles the MouseDown event of the Grid control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             foreach(var p in SelectedGroup.GroupPersons)
@@ -384,9 +453,18 @@ namespace Photo_Detect_Catalogue_Search_WPF_App.Controls
             person.IsSelected = true;
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnImportGroup control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void btnImportGroup_Click(object sender, RoutedEventArgs e)
         {
-
+            _mainWindow.Dispatcher.Invoke(() => 
+            {
+                var listBox = (ListBox)_mainWindow._scenariosControl.FindName("_scenarioListBox");
+                listBox.SelectedIndex = 0;
+            });
         }
     }
 
